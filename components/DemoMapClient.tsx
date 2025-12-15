@@ -35,7 +35,7 @@ export default function DemoMapClient({
       mapStyle="mapbox://styles/mapbox/streets-v12"
     >
       {sessions.map((s) => {
-        const color = SPORT_COLORS[s.sport] || SPORT_COLORS.Autres;
+        const color = (SPORT_COLORS as Record<string, string>)[s.sport] || SPORT_COLORS.Autres;
 
         return (
           <Marker
