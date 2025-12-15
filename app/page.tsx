@@ -1,65 +1,194 @@
-import Image from "next/image";
+import { supabase } from "@/lib/supabase";
+import SessionCard from "@/components/SessionCard";
+import DemoMapClient from "@/components/DemoMapClient";
+import Header from "@/components/Header";
 
-export default function Home() {
+export default async function DemoPage() {
+  const today = new Date().toISOString().split("T")[0];
+
+  const { data: sessions, error } = await supabase
+    .from("sessions")
+    .select("id, sport, level, date, time, location, description, lat, lng")
+    .gte("date", today)
+    .order("date", { ascending: true });
+
+  if (error) {
+    return (
+      <>
+        <Header />
+        <main style={{ padding: 24 }}>
+          <p>Erreur : {error.message}</p>
+        </main>
+      </>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <>
+      <Header />
+
+      <main
+        style={{
+          padding: "32px 16px 64px",
+          maxWidth: 1100,
+          margin: "0 auto",
+          background: "#F6F7FA",
+          minHeight: "100vh",
+        }}
+      >
+{/* -------- HERO CENTRÉ -------- */}
+<section
+  style={{
+    marginBottom: 56,
+    textAlign: "center",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  }}
+>
+  {/* SLOGAN */}
+  <h1
+    style={{
+      fontSize: 38,
+      fontWeight: 900,
+      lineHeight: "46px",
+      marginBottom: 16,
+      maxWidth: 640,
+    }}
+  >
+    Le sport, ça se partage.
+  </h1>
+
+  {/* TEXTE PRINCIPAL */}
+  <p
+    style={{
+      fontSize: 16,
+      color: "#444",
+      maxWidth: 560,
+      lineHeight: "26px",
+      marginBottom: 12,
+    }}
+  >
+    Unite rassemble des personnes qui veulent pratiquer un sport ensemble,
+    simplement et localement.
+  </p>
+
+  <p
+    style={{
+      fontSize: 15,
+      color: "#555",
+      maxWidth: 560,
+      lineHeight: "24px",
+      marginBottom: 12,
+    }}
+  >
+    Cette page te montre un aperçu réel de l’application, avec des sessions
+    actives près de chez toi.
+  </p>
+
+  {/* CTA TEXTE */}
+<p
+  style={{
+    marginTop: 10,
+    fontSize: 14,
+    fontWeight: 600,
+    color: "#555",
+    maxWidth: 520,
+    lineHeight: "22px",
+  }}
+>
+  Explore une session pour voir comment ça fonctionne.  
+  Pour rejoindre, créer et participer, télécharge Unite sur{" "}
+  <a
+    href="https://apps.apple.com/us/app/uniteapp/id6755112837"
+    target="_blank"
+    rel="noopener noreferrer"
+    style={{
+      color: "#FF6C4A",
+      textDecoration: "none",
+      fontWeight: 700,
+    }}
+  >
+    l’App Store
+  </a>{" "}
+  et{" "}
+  <a
+    href="https://play.google.com/store/apps/details?id=com.uniteapp.collectif"
+    target="_blank"
+    rel="noopener noreferrer"
+    style={{
+      color: "#FF6C4A",
+      textDecoration: "none",
+      fontWeight: 700,
+    }}
+  >
+    le Play Store
+  </a>.
+</p>
+</section>
+
+        {/* -------- MAP AVEC PINS RÉELS -------- */}
+        {sessions && sessions.length > 0 && (
+          <section style={{ marginBottom: 48 }}>
+            <h2
+              style={{
+                fontSize: 18,
+                fontWeight: 800,
+                marginBottom: 14,
+              }}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              Sessions autour de toi
+            </h2>
+
+            <div
+              style={{
+                borderRadius: 24,
+                overflow: "hidden",
+                boxShadow: "0 12px 30px rgba(0,0,0,0.08)",
+                height: 360,
+              }}
             >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+<DemoMapClient
+  sessions={sessions.map((s) => ({
+    id: s.id,
+    lat: s.lat,
+    lng: s.lng,
+    sport: s.sport, // ✅ AJOUT ICI
+  }))}
+/>
+            </div>
+          </section>
+        )}
+
+        {/* -------- LISTE -------- */}
+        <section>
+          <h2
+            style={{
+              fontSize: 18,
+              fontWeight: 800,
+              marginBottom: 18,
+            }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+            Sessions à venir
+          </h2>
+
+          {sessions && sessions.length > 0 ? (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+                gap: 20,
+              }}
+            >
+              {sessions.map((session) => (
+                <SessionCard key={session.id} {...session} />
+              ))}
+            </div>
+          ) : (
+            <p>Aucune session disponible pour le moment.</p>
+          )}
+        </section>
       </main>
-    </div>
+    </>
   );
 }
