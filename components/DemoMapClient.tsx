@@ -19,13 +19,20 @@ export default function DemoMapClient({
 }) {
   const router = useRouter();
 
+  const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+
+  if (!mapboxToken) {
+    console.warn("Mapbox token missing");
+    return null;
+  }
+
   if (!sessions || sessions.length === 0) return null;
 
   return (
     <Map
-      mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+      mapboxAccessToken={mapboxToken}
       initialViewState={{
-        latitude: 46.6,      // centre France
+        latitude: 46.6,
         longitude: 2.5,
         zoom: 5,
       }}
@@ -35,7 +42,9 @@ export default function DemoMapClient({
       mapStyle="mapbox://styles/mapbox/streets-v12"
     >
       {sessions.map((s) => {
-        const color = (SPORT_COLORS as Record<string, string>)[s.sport] || SPORT_COLORS.Autres;
+        const color =
+          (SPORT_COLORS as Record<string, string>)[s.sport] ||
+          SPORT_COLORS.Autres;
 
         return (
           <Marker
