@@ -23,35 +23,39 @@ export default function DemoPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-useEffect(() => {
-  const fetchSessions = async () => {
-    try {
-      const supabase = getSupabase();
-      if (!supabase) return;
+  useEffect(() => {
+    const fetchSessions = async () => {
+      try {
+        const supabase = getSupabase();
 
-      // ✅ DÉFINITION MANQUANTE
-      const today = new Date().toISOString().split("T")[0];
+        // ✅ Supabase pas encore prêt → on stop proprement
+        if (!supabase) {
+          setLoading(false);
+          return;
+        }
 
-      const { data, error } = await supabase
-        .from("sessions")
-        .select(
-          "id, sport, level, date, time, location, description, lat, lng"
-        )
-        .gte("date", today)
-        .order("date", { ascending: true });
+        const today = new Date().toISOString().split("T")[0];
 
-      if (error) throw error;
+        const { data, error } = await supabase
+          .from("sessions")
+          .select(
+            "id, sport, level, date, time, location, description, lat, lng"
+          )
+          .gte("date", today)
+          .order("date", { ascending: true });
 
-      setSessions(data || []);
-    } catch (err: any) {
-      setError(err.message || "Erreur lors du chargement");
-    } finally {
-      setLoading(false);
-    }
-  };
+        if (error) throw error;
 
-  fetchSessions();
-}, []);
+        setSessions(data || []);
+      } catch (err: any) {
+        setError(err.message || "Erreur lors du chargement");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSessions();
+  }, []);
 
   return (
     <>
@@ -113,46 +117,6 @@ useEffect(() => {
             Cette page te montre un aperçu réel de l’application, avec des
             sessions actives près de chez toi.
           </p>
-
-          <p
-            style={{
-              marginTop: 10,
-              fontSize: 14,
-              fontWeight: 600,
-              color: "#555",
-              maxWidth: 520,
-              lineHeight: "22px",
-            }}
-          >
-            Explore une session pour voir comment ça fonctionne. Pour rejoindre,
-            créer et participer, télécharge Unite sur{" "}
-            <a
-              href="https://apps.apple.com/us/app/uniteapp/id6755112837"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                color: "#FF6C4A",
-                textDecoration: "none",
-                fontWeight: 700,
-              }}
-            >
-              l’App Store
-            </a>{" "}
-            et{" "}
-            <a
-              href="https://play.google.com/store/apps/details?id=com.uniteapp.collectif"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                color: "#FF6C4A",
-                textDecoration: "none",
-                fontWeight: 700,
-              }}
-            >
-              le Play Store
-            </a>
-            .
-          </p>
         </section>
 
         {/* -------- STATES -------- */}
@@ -167,13 +131,7 @@ useEffect(() => {
         {/* -------- MAP -------- */}
         {!loading && sessions.length > 0 && (
           <section style={{ marginBottom: 48 }}>
-            <h2
-              style={{
-                fontSize: 18,
-                fontWeight: 800,
-                marginBottom: 14,
-              }}
-            >
+            <h2 style={{ fontSize: 18, fontWeight: 800, marginBottom: 14 }}>
               Sessions autour de toi
             </h2>
 
@@ -199,13 +157,7 @@ useEffect(() => {
 
         {/* -------- LISTE -------- */}
         <section>
-          <h2
-            style={{
-              fontSize: 18,
-              fontWeight: 800,
-              marginBottom: 18,
-            }}
-          >
+          <h2 style={{ fontSize: 18, fontWeight: 800, marginBottom: 18 }}>
             Sessions à venir
           </h2>
 
