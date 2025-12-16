@@ -41,7 +41,6 @@ export default function DemoPage() {
           .select(
             "id, sport, level, date, time, location, description, lat, lng"
           )
-          .gte("date", today)
           .order("date", { ascending: true });
 
         if (error) throw error;
