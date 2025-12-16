@@ -23,32 +23,35 @@ export default function DemoPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchSessions = async () => {
-      try {
-        const supabase = getSupabase();
-        const today = new Date().toISOString().split("T")[0];
+useEffect(() => {
+  const fetchSessions = async () => {
+    try {
+      const supabase = getSupabase();
+      if (!supabase) return;
 
-        const { data, error } = await supabase
-          .from("sessions")
-          .select(
-            "id, sport, level, date, time, location, description, lat, lng"
-          )
-          .gte("date", today)
-          .order("date", { ascending: true });
+      // ✅ DÉFINITION MANQUANTE
+      const today = new Date().toISOString().split("T")[0];
 
-        if (error) throw error;
+      const { data, error } = await supabase
+        .from("sessions")
+        .select(
+          "id, sport, level, date, time, location, description, lat, lng"
+        )
+        .gte("date", today)
+        .order("date", { ascending: true });
 
-        setSessions(data || []);
-      } catch (err: any) {
-        setError(err.message || "Erreur lors du chargement");
-      } finally {
-        setLoading(false);
-      }
-    };
+      if (error) throw error;
 
-    fetchSessions();
-  }, []);
+      setSessions(data || []);
+    } catch (err: any) {
+      setError(err.message || "Erreur lors du chargement");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchSessions();
+}, []);
 
   return (
     <>
