@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getSupabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import SessionCard from "@/components/SessionCard";
 import DemoMapClient from "@/components/DemoMapClient";
 import Header from "@/components/Header";
@@ -26,26 +26,28 @@ export default function DemoPage() {
   useEffect(() => {
     const fetchSessions = async () => {
       try {
-        const supabase = getSupabase();
-
-        // ✅ Supabase pas encore prêt → on stop proprement
-        if (!supabase) {
-          setLoading(false);
-          return;
-        }
-
         const today = new Date().toISOString().split("T")[0];
 
-        const { data, error } = await supabase
-          .from("sessions")
-          .select(
-            "id, sport, level, date, time, location, description, lat, lng"
-          )
-          .order("date", { ascending: true });
+const { data, error } = await supabase
+  .from("sessions")
+  .select(
+    "id, sport, level, date, time, location, description, lat, lng"
+  )
+  .gte("date", today)
+  .order("date", { ascending: true });
 
-        if (error) throw error;
+if (error) throw error;
 
-        setSessions(data || []);
+setSessions(data ?? []);
+
+        // 🔥 filtre heure (optionnel mais recommandé)
+        const now = new Date();
+        const upcoming = (data ?? []).filter((s) => {
+          const sessionDate = new Date(`${s.date}T${s.time}`);
+          return sessionDate >= now;
+        });
+
+        setSessions(upcoming);
       } catch (err: any) {
         setError(err.message || "Erreur lors du chargement");
       } finally {
@@ -116,6 +118,36 @@ export default function DemoPage() {
             Cette page te montre un aperçu réel de l’application, avec des
             sessions actives près de chez toi.
           </p>
+
+        <p
+  style={{
+    fontSize: 15,
+    color: "#555",
+    maxWidth: 560,
+    lineHeight: "24px",
+    marginBottom: 12,
+  }}
+>
+  Pour rejoindre une session, en créer une ou participer, télécharge l’application sur{" "}
+  <a
+    href="https://apps.apple.com/us/app/uniteapp/id6755112837"
+    target="_blank"
+    rel="noopener noreferrer"
+    style={{ color: "#FF6C4A", fontWeight: 700 }}
+  >
+    l’App Store
+  </a>{" "}
+  ou{" "}
+  <a
+    href="https://play.google.com/store/apps/details?id=com.uniteapp.collectif"
+    target="_blank"
+    rel="noopener noreferrer"
+    style={{ color: "#FF6C4A", fontWeight: 700 }}
+  >
+    Play Store
+  </a>
+  .
+</p>
         </section>
 
         {/* -------- STATES -------- */}
